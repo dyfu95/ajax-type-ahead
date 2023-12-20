@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { createAxiosRequest, debounce } from "../utils";
 import SuggestionItem from "./SuggestionItem";
 import Suggestions from "./Suggestions";
+
 /**
  * @typedef {Object} City
  * @property {string} city
@@ -41,7 +42,9 @@ const SuggestionsWrapper = styled.ul`
 `;
 
 const ENDPOINT =
-  "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
+  process.env.REACT_APP_OPEN_MOCK_SERVER === "true"
+    ? "http://localhost:8080/json/cities.json"
+    : "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
 
 /**
  *
