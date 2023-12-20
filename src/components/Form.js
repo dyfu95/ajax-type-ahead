@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { createAxiosRequest } from "../utils";
+import { createAxiosRequest, debounce } from "../utils";
 import SuggestionItem from "./SuggestionItem";
 import Suggestions from "./Suggestions";
 /**
@@ -76,7 +76,7 @@ export default function Form() {
   /**
    * @param {{ target: HTMLInputElement }} e
    */
-  const handleOnChange = (e) => {
+  const handleOnChange = debounce((e) => {
     const value = e.target.value.trim();
     setKeyWords(value);
     if (!value) {
@@ -87,7 +87,7 @@ export default function Form() {
       setSearchResult(findResult);
       setIsSearched(true);
     }
-  };
+  });
 
   useEffect(() => {
     getCityOrStateData()

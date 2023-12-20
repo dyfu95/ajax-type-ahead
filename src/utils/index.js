@@ -39,5 +39,14 @@ const createAxiosRequest = (
 const numberWithCommas = (x) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
+function debounce(fn, delay = 500) {
+  let timer;
 
-export { createAxiosRequest, numberWithCommas };
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+}
+export { createAxiosRequest, numberWithCommas, debounce };
