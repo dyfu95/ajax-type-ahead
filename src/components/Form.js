@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { createAxiosRequest, numberWithCommas } from "../utils";
-
+import SuggestionItem from "./SuggestionItem";
 const SearchForm = styled.form`
   width: 100%;
   max-width: 440px;
@@ -26,27 +26,6 @@ const Suggestions = styled.ul`
   margin: 0 auto;
   padding: 0 20px;
   position: relative;
-`;
-
-const SuggestionItem = styled.li`
-  background: white;
-  list-style: none;
-  border-bottom: 1px solid #d8d8d8;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.14);
-  margin: 0;
-  padding: 20px;
-  transition: background 0.2s;
-  display: flex;
-  justify-content: space-between;
-  text-transform: capitalize;
-  &:nth-child(even) {
-    transform: perspective(100px) rotateX(3deg) translateY(2px) scale(1.001);
-    background: linear-gradient(to bottom, #ffffff 0%, #efefef 100%);
-  }
-  &:nth-child(odd) {
-    transform: perspective(100px) rotateX(-3deg) translateY(3px);
-    background: linear-gradient(to top, #ffffff 0%, #efefef 100%);
-  }
 `;
 
 const ENDPOINT =
@@ -83,17 +62,18 @@ export default function Form() {
       case "loading":
         return (
           <Suggestions>
-            <SuggestionItem>Loading...</SuggestionItem>
+            <SuggestionItem name="Loading..." />
           </Suggestions>
         );
       case "success":
         return (
           <Suggestions>
             {searchResult.map((item) => (
-              <SuggestionItem key={item.city}>
-                {item.city}
-                {numberWithCommas(item.population)}
-              </SuggestionItem>
+              <SuggestionItem
+                key={item.city}
+                name={item.city}
+                population={numberWithCommas(item.population)}
+              ></SuggestionItem>
             ))}
           </Suggestions>
         );
