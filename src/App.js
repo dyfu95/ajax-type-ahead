@@ -1,6 +1,6 @@
 import { GlobalStyles } from "./style/GlobalStyle";
 import styled from "styled-components";
-
+import Form from "./components/Form";
 const Main = styled.main`
   width: 100%;
   height: 100%;
@@ -13,7 +13,9 @@ function App() {
   return (
     <>
       <GlobalStyles />
-      <Main></Main>
+      <Main>
+        <Form></Form>
+      </Main>
     </>
   );
 }
