@@ -11,11 +11,6 @@ import SuggestionItem from "./SuggestionItem";
  * @property {string} state
  */
 
-const test = (keywords, result) => {
-  const regex = new RegExp(result, "gi");
-  return regex;
-};
-
 /**
  *
  * @param {Object} props
