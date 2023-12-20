@@ -83,7 +83,32 @@ export default function Form() {
       setIsSearched(false);
       setSearchResult([]);
     } else {
-      const findResult = findMatches(value, cities);
+      let findResult = [];
+      const localStorageKey = `ajax-type-ahead-${value}`;
+      const ls = localStorage.getItem(localStorageKey);
+      const currentTimestamp = new Date().getTime();
+
+      if (!ls) {
+        findResult = findMatches(value, cities);
+
+        localStorage.setItem(
+          localStorageKey,
+          JSON.stringify({
+            timestamp: currentTimestamp,
+            result: findResult,
+          })
+        );
+      } else {
+        const storeValue = JSON.parse(ls);
+        const storeTimestamp = storeValue.timestamp;
+        //localStorage 所儲存的資料其儲存時間是否過久（超過一天），若是的話則清除對應的資料。
+        if (currentTimestamp - storeTimestamp > 1000 * 60 * 24) {
+          localStorage.removeItem(localStorageKey);
+          findResult = findMatches(value, cities);
+        } else {
+          findResult = storeValue.result;
+        }
+      }
       setSearchResult(findResult);
       setIsSearched(true);
     }
