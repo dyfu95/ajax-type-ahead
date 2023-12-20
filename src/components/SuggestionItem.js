@@ -11,6 +11,9 @@ const Item = styled.li`
   display: flex;
   justify-content: space-between;
   text-transform: capitalize;
+  .highlight {
+    background: #ffc600;
+  }
   &:nth-child(even) {
     transform: perspective(100px) rotateX(3deg) translateY(2px) scale(1.001);
     background: linear-gradient(to bottom, #ffffff 0%, #efefef 100%);
@@ -24,10 +27,36 @@ const Item = styled.li`
   }
 `;
 
+/**
+ *
+ * @param {Object} props
+ * @param {string | Array} props.name
+ * @param {string} [props.population]
+ * @returns
+ */
 export default function SuggestionItem({ name, population = undefined }) {
+  if (typeof name === "string") {
+    return (
+      <Item>
+        <p className="name">{name}</p>
+        {population && <p className="population">{population}</p>}
+      </Item>
+    );
+  }
+  const nameJsx = (
+    <>
+      {name.map((item) => {
+        if (item.shouldHighlight) {
+          return <span className="highlight">{item.value}</span>;
+        }
+        return <span>{item.value}</span>;
+      })}
+    </>
+  );
+
   return (
     <Item>
-      <p className="name">{name}</p>
+      <p className="name">{nameJsx}</p>
       {population && <p className="population">{population}</p>}
     </Item>
   );

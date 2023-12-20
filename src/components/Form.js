@@ -62,6 +62,7 @@ const axiosRequest = createAxiosRequest(ENDPOINT);
 export default function Form() {
   const [cities, setCities] = useState([]);
   const [loadStatus, setLoadStatus] = useState("loading");
+  const [keywords, setKeyWords] = useState("");
   const [searchResults, setSearchResult] = useState([]);
   const [isSearched, setIsSearched] = useState(false);
   const getCityOrStateData = async () => {
@@ -75,8 +76,9 @@ export default function Form() {
   /**
    * @param {{ target: HTMLInputElement }} e
    */
-  const displayMatches = (e) => {
+  const handleOnChange = (e) => {
     const value = e.target.value.trim();
+    setKeyWords(value);
     if (!value) {
       setIsSearched(false);
       setSearchResult([]);
@@ -86,6 +88,7 @@ export default function Form() {
       setIsSearched(true);
     }
   };
+
   useEffect(() => {
     getCityOrStateData()
       .then((res) => {
@@ -103,7 +106,11 @@ export default function Form() {
         return <SuggestionItem name="Loading..." />;
       case "success":
         return (
-          <Suggestions searchResults={searchResults} isSearched={isSearched} />
+          <Suggestions
+            searchResults={searchResults}
+            keywords={keywords}
+            isSearched={isSearched}
+          />
         );
       case "fail":
         return (
@@ -120,7 +127,7 @@ export default function Form() {
     <SearchForm>
       <SearchInput
         type="text"
-        onChange={displayMatches}
+        onChange={handleOnChange}
         placeholder="City or State"
       ></SearchInput>
       <SuggestionsWrapper>{resultJsx}</SuggestionsWrapper>

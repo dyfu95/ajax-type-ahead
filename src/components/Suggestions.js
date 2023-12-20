@@ -11,14 +11,20 @@ import SuggestionItem from "./SuggestionItem";
  * @property {string} state
  */
 
+const test = (keywords, result) => {
+  const regex = new RegExp(result, "gi");
+  return regex;
+};
+
 /**
  *
  * @param {Object} props
- * @param {City[] | string[]} props.searchResults
+ * @param {City[]} props.searchResults
+ * @param {string} props.keywords
  * @param {boolean} props.isSearched
  * @returns
  */
-export default function Suggestions({ searchResults, isSearched }) {
+export default function Suggestions({ searchResults, isSearched, keywords }) {
   if (!isSearched) {
     return (
       <>
@@ -32,10 +38,37 @@ export default function Suggestions({ searchResults, isSearched }) {
   );
   const suggestionItemJsx = hasResults ? (
     searchResults.map((item) => {
+      const cityName = item.city;
+      const stateName = item.state;
+      const regex = new RegExp(`(${keywords})`, "gi");
+
+      const cityNameArray = cityName.split(regex);
+      const stateNameArray = stateName.split(regex);
+      const formatCityNameArray = cityNameArray
+        .filter((item) => item)
+        .map((item) => {
+          return {
+            value: item,
+            shouldHighlight: item.toLowerCase() === keywords.toLowerCase(),
+          };
+        });
+      const formatStateNameArray = stateNameArray
+        .filter((item) => item)
+        .map((item) => {
+          return {
+            value: item,
+            shouldHighlight: item.toLowerCase() === keywords.toLowerCase(),
+          };
+        });
+      const separator = [{ value: ", ", shouldHighlight: false }];
+      const formatArray = formatCityNameArray.concat(
+        separator,
+        formatStateNameArray
+      );
       return (
         <SuggestionItem
           key={item.rank}
-          name={item.city}
+          name={formatArray}
           population={numberWithCommas(item.population)}
         ></SuggestionItem>
       );
