@@ -1,7 +1,19 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { createAxiosRequest, numberWithCommas } from "../utils";
+import { createAxiosRequest } from "../utils";
 import SuggestionItem from "./SuggestionItem";
+import Suggestions from "./Suggestions";
+/**
+ * @typedef {Object} City
+ * @property {string} city
+ * @property {string} growth_from_2000_to_2013
+ * @property {number} latitude
+ * @property {number} longitude
+ * @property {string} population
+ * @property {string} rank
+ * @property {string} state
+ */
+
 const SearchForm = styled.form`
   width: 100%;
   max-width: 440px;
@@ -22,7 +34,7 @@ const SearchInput = styled.input`
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.12), inset 0 0 2px rgba(0, 0, 0, 0.19);
 `;
 
-const Suggestions = styled.ul`
+const SuggestionsWrapper = styled.ul`
   margin: 0 auto;
   padding: 0 20px;
   position: relative;
@@ -31,10 +43,27 @@ const Suggestions = styled.ul`
 const ENDPOINT =
   "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
 
+/**
+ *
+ * @param {string} wordToMatch
+ * @param {City[]} cities
+ * @returns {City[]}
+ */
+const findMatches = (wordToMatch, cities) => {
+  return cities.filter((place) => {
+    // here we need to figure out if the city or state matches what was searched
+    const regex = new RegExp(wordToMatch, "gi");
+    return place.city.match(regex) || place.state.match(regex);
+  });
+};
+
 const axiosRequest = createAxiosRequest(ENDPOINT);
+
 export default function Form() {
-  const [searchResult, setSearchResult] = useState([]);
-  const [loadStatus, setLoadStatus] = useState("stale");
+  const [cities, setCities] = useState([]);
+  const [loadStatus, setLoadStatus] = useState("loading");
+  const [searchResults, setSearchResult] = useState([]);
+  const [isSearched, setIsSearched] = useState(false);
   const getCityOrStateData = async () => {
     try {
       const res = await axiosRequest();
@@ -43,12 +72,24 @@ export default function Form() {
       throw new Error(error);
     }
   };
-
+  /**
+   * @param {{ target: HTMLInputElement }} e
+   */
+  const displayMatches = (e) => {
+    const value = e.target.value.trim();
+    if (!value) {
+      setIsSearched(false);
+      setSearchResult([]);
+    } else {
+      const findResult = findMatches(value, cities);
+      setSearchResult(findResult);
+      setIsSearched(true);
+    }
+  };
   useEffect(() => {
-    setLoadStatus("loading");
     getCityOrStateData()
       .then((res) => {
-        setSearchResult(res);
+        setCities(res);
         setLoadStatus("success");
       })
       .catch((err) => {
@@ -58,24 +99,11 @@ export default function Form() {
   }, []);
   const getResultJsx = () => {
     switch (loadStatus) {
-      case "stale":
       case "loading":
-        return (
-          <Suggestions>
-            <SuggestionItem name="Loading..." />
-          </Suggestions>
-        );
+        return <SuggestionItem name="Loading..." />;
       case "success":
         return (
-          <Suggestions>
-            {searchResult.map((item) => (
-              <SuggestionItem
-                key={item.city}
-                name={item.city}
-                population={numberWithCommas(item.population)}
-              ></SuggestionItem>
-            ))}
-          </Suggestions>
+          <Suggestions searchResults={searchResults} isSearched={isSearched} />
         );
       case "fail":
         return (
@@ -84,14 +112,18 @@ export default function Form() {
           </div>
         );
       default:
-        break;
+        return null;
     }
   };
   const resultJsx = getResultJsx();
   return (
     <SearchForm>
-      <SearchInput type="text" placeholder="City or State"></SearchInput>
-      {resultJsx}
+      <SearchInput
+        type="text"
+        onChange={displayMatches}
+        placeholder="City or State"
+      ></SearchInput>
+      <SuggestionsWrapper>{resultJsx}</SuggestionsWrapper>
     </SearchForm>
   );
 }
