@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import styled from "styled-components";
+import { createAxiosRequest, numberWithCommas } from "../utils";
 
 const SearchForm = styled.form`
   width: 100%;
@@ -47,18 +49,69 @@ const SuggestionItem = styled.li`
   }
 `;
 
+const ENDPOINT =
+  "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
+
+const axiosRequest = createAxiosRequest(ENDPOINT);
 export default function Form() {
+  const [searchResult, setSearchResult] = useState([]);
+  const [loadStatus, setLoadStatus] = useState("stale");
+  const getCityOrStateData = async () => {
+    try {
+      const res = await axiosRequest();
+      return res.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  };
+
+  useEffect(() => {
+    setLoadStatus("loading");
+    getCityOrStateData()
+      .then((res) => {
+        setSearchResult(res);
+        setLoadStatus("success");
+      })
+      .catch((err) => {
+        setLoadStatus("fail");
+        console.error(err);
+      });
+  }, []);
+  const getResultJsx = () => {
+    switch (loadStatus) {
+      case "stale":
+      case "loading":
+        return (
+          <Suggestions>
+            <SuggestionItem>Loading...</SuggestionItem>
+          </Suggestions>
+        );
+      case "success":
+        return (
+          <Suggestions>
+            {searchResult.map((item) => (
+              <SuggestionItem key={item.city}>
+                {item.city}
+                {numberWithCommas(item.population)}
+              </SuggestionItem>
+            ))}
+          </Suggestions>
+        );
+      case "fail":
+        return (
+          <div>
+            <p>發生非預期的錯誤</p>
+          </div>
+        );
+      default:
+        break;
+    }
+  };
+  const resultJsx = getResultJsx();
   return (
     <SearchForm>
-      <SearchInput
-        type="text"
-        class="search"
-        placeholder="City or State"
-      ></SearchInput>
-      <Suggestions class="suggestions">
-        <SuggestionItem>Filter for a city</SuggestionItem>
-        <SuggestionItem>or a state</SuggestionItem>
-      </Suggestions>
+      <SearchInput type="text" placeholder="City or State"></SearchInput>
+      {resultJsx}
     </SearchForm>
   );
 }
